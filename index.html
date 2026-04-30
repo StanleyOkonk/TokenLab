@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokenLab | Visualiser</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <img src="images/favicon.png" alt="" class="logo-icon" />
+      <span class="logo-text"><span class="logo-highlight">Token</span>Lab</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">Visualiser</a>
+      <a href="compare.html" class="nav-link">Compare</a>
+    </div>
+  </nav>
+
+  <!-- ── VISUALISER ── -->
+  <div class="token-box">
+
+    <h2>Tokenisation Visualiser</h2>
+    <p class="token-box-subtitle">Type text to tokenise!</p>
+
+    <!-- Method dropdown -->
+    <div class="method-dropdown" id="method-dropdown">
+      <button class="method-dropdown-btn" id="method-dropdown-btn">
+        <div class="method-dropdown-selected">
+          <span class="method-dropdown-name" id="method-dropdown-name">BPE</span>
+          <span class="method-dropdown-full" id="method-dropdown-full">Byte Pair Encoding</span>
+        </div>
+        <span class="method-dropdown-arrow">▾</span>
+      </button>
+      <div class="method-dropdown-list" id="method-dropdown-list">
+        <button class="method-option active" data-method="bpe">
+          <span class="method-option-name">BPE</span>
+          <span class="method-option-full">Byte Pair Encoding</span>
+        </button>
+        <button class="method-option" data-method="wordpiece">
+          <span class="method-option-name">WordPiece</span>
+          <span class="method-option-full">BERT-style</span>
+        </button>
+        <button class="method-option" data-method="sentencepiece">
+          <span class="method-option-name">SentencePiece</span>
+          <span class="method-option-full">Unigram-based</span>
+        </button>
+        <button class="method-option" data-method="word">
+          <span class="method-option-name">Word</span>
+          <span class="method-option-full">Word-Level</span>
+        </button>
+        <button class="method-option" data-method="sentence">
+          <span class="method-option-name">Sentence</span>
+          <span class="method-option-full">Sentence-Level</span>
+        </button>
+        <button class="method-option" data-method="char">
+          <span class="method-option-name">Char</span>
+          <span class="method-option-full">Character-Level</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sample presets -->
+    <div class="lang-presets">
+      <span class="lang-presets-label">Try:</span>
+      <button class="lang-btn active-lang" data-text="The tokenisation of unbelievable text is fascinating!">English</button>
+      <button class="lang-btn" data-text="東京は日本の首都で、世界最大の都市です。">Japanese</button>
+      <button class="lang-btn" data-text="مرحباً بك في عالم الذكاء الاصطناعي">Arabic</button>
+      <button class="lang-btn" data-text="北京是中华人民共和国的首都">Chinese</button>
+    </div>
+
+    <!-- Textarea -->
+    <textarea id="tokenInput" placeholder="Type or paste text here..." spellcheck="false" maxlength="3000">The tokenisation of unbelievable text is fascinating!</textarea>
+    <div class="char-counter" id="char-counter"></div>
+
+    <!-- Buttons -->
+    <div class="button-row">
+      <button class="clearButton" onclick="clearInput()">Clear</button>
+    </div>
+
+    <!-- Output -->
+    <div class="output-section">
+      <div class="output-label">Token Output</div>
+      <div class="token-display" id="tokenOutput"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value" id="statTokens">0</span>
+        <span class="stat-label">Tokens</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="statChars">0</span>
+        <span class="stat-label">Characters</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="statRatio">0</span>
+        <span class="stat-label">Chars / Token</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="statVocab">0</span>
+        <span class="stat-label">Unique</span>
+      </div>
+    </div>
+
+    <!-- Token detail panel -->
+    <div class="token-detail" id="token-detail" hidden>
+      <span class="token-detail-chip" id="td-chip"></span>
+      <div class="token-detail-info">
+        <div class="token-detail-row">
+          <span class="token-detail-label">ID</span>
+          <span class="token-detail-val" id="td-id">—</span>
+        </div>
+        <div class="token-detail-row">
+          <span class="token-detail-label">Position</span>
+          <span class="token-detail-val" id="td-pos">—</span>
+        </div>
+        <div class="token-detail-row">
+          <span class="token-detail-label">Bytes</span>
+          <span class="token-detail-val" id="td-bytes">—</span>
+        </div>
+      </div>
+      <button class="token-detail-close" id="token-detail-close" aria-label="Close">×</button>
+    </div>
+
+  </div>
+
+
+  <!-- ── WHAT IS TOKENISATION ── -->
+  <div class="container1">
+    <h1>What is Tokenisation?</h1>
+
+    <p>
+      Tokenisation is the process of dividing a stream of text into smaller pieces, called tokens.
+      These tokens can be words, subwords, characters or symbols, which depend on the design of the system.
+      Tokenisation is a basic process of Natural Language Processing (NLP) as computers are not able to comprehend raw
+      text as humans can.
+      The machine learning model cannot analyse language before it's broken down into tokens.
+    </p>
+
+    <p>
+      For example, the sentence: <i>"The cat is being chased by the dog."</i>
+      This sentence can be tokenised into individual word tokens: <code>["The", "cat", "is", "being", "chased", "by", "the", "dog"]</code>.
+    </p>
+
+    <p>
+      Simply put, tokenisation transforms continuous text into a structured form that can be manipulated by a computer.
+      This process is applied in search engines, chatbots, translation systems and text analysis tools.
+    </p>
+
+    <p>Large language models use tokenisation as a preprocessing stage before training or text generation.</p>
+  </div>
+
+
+  <!-- ── HOW TOKENISATION WORKS ── -->
+  <div class="container2">
+    <h1>How Tokenisation Works</h1>
+
+    <p>
+      The principle of tokenisation is based on the division of text into smaller units by using rules or algorithms.
+      The algorithm used for tokenisation is based on the language and on the purpose of the task.
+    </p>
+
+    <!-- Step 1 -->
+    <h2>Step 1: Text Input</h2>
+    <p>The input stage starts with the raw text. This may either be a sentence, paragraph or even a document.</p>
+    <div class="step1-visual">
+      <div class="typing-box">The cats are chasing a mouse!</div>
+      <div class="arrow">↓</div>
+      <div class="text-box processed">Raw Text Input</div>
+    </div>
+
+    <!-- Step 2 -->
+    <h2>Step 2: Preprocessing</h2>
+    <p>After the text is inserted, the text would be normalised. This can include:</p>
+    <ul>
+      <li>Changing all letters into lowercase</li>
+      <li>Removing punctuation</li>
+      <li>Eliminating extra spaces</li>
+    </ul>
+    <p>For example: <i>"Hello, World!"</i> might become: "hello world"</p>
+    <div class="step2-visual">
+      <div class="text-box original">"The cats are chasing a mouse!"</div>
+      <div class="arrow">↓</div>
+      <div class="text-box processed">the cats are chasing a mouse</div>
+    </div>
+
+    <!-- Step 3 -->
+    <h2>Step 3: Splitting into Tokens</h2>
+    <p>
+      After normalising the text, the input is now ready.
+      The system would divide the text into tokens. The output of the inputted text would be based on the tokenisation type chosen:
+    </p>
+    <ul>
+      <li><strong>Word Tokenisation:</strong> splits the text by space</li>
+      <p class="example-text"><i>"I really like tokenisation"</i> becomes <code>["I", "really", "like", "tokenisation"]</code></p>
+      <li><strong>Character Tokenisation:</strong> splits text into individual characters</li>
+      <p class="example-text"><code>["t", "o", "k", "e", "n", "i", "s", "a", "t", "i", "o", "n"]</code></p>
+    </ul>
+    <div class="step3-visual">
+      <div class="sentence">the cats are chasing a mouse</div>
+      <div class="arrow">↓</div>
+      <div class="tokens">
+        <span class="bracket">[</span>
+        <span class="vt vt--word">"the"</span>
+        <span class="vt vt--word">"cats"</span>
+        <span class="vt vt--word">"are"</span>
+        <span class="vt vt--word">"chasing"</span>
+        <span class="vt vt--word">"a"</span>
+        <span class="vt vt--word">"mouse"</span>
+        <span class="bracket">]</span>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <h2>Step 4: Conversion into Numerical Form</h2>
+    <p>Once the input is tokenised, every token is assigned a number. Computers cannot analyse words and therefore, the words need to be converted into numbers.</p>
+    <p>For example: <code>"hello"</code> → <code>321</code></p>
+    <p>Neural networks and language models take these numbers as their inputs.</p>
+    <div class="step4-visual">
+      <div class="token-pair">
+        <span class="vt vt--word">"the"</span>
+        <span class="arrow-down">↓</span>
+        <span class="num">104</span>
+      </div>
+      <div class="token-pair">
+        <span class="vt vt--word">"cats"</span>
+        <span class="arrow-down">↓</span>
+        <span class="num">582</span>
+      </div>
+      <div class="token-pair">
+        <span class="vt vt--word">"are"</span>
+        <span class="arrow-down">↓</span>
+        <span class="num">47</span>
+      </div>
+      <div class="token-pair">
+        <span class="vt vt--word">"chasing"</span>
+        <span class="arrow-down">↓</span>
+        <span class="num">913</span>
+      </div>
+      <div class="token-pair">
+        <span class="vt vt--word">"a"</span>
+        <span class="arrow-down">↓</span>
+        <span class="num">9</span>
+      </div>
+      <div class="token-pair">
+        <span class="vt vt--word">"mouse"</span>
+        <span class="arrow-down">↓</span>
+        <span class="num">441</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── TYPES OF TOKENISATION ── -->
+  <div class="container3">
+    <h1>Types of Tokenisation</h1>
+
+    <!-- Word -->
+    <h2>Word Tokenisation</h2>
+    <p>
+      <i>Word Tokenisation</i> is the process of breaking text down into the individual <b>words</b>.<br>
+      It generally operates on the principle of <i>dividing</i> words into spaces and punctuations.
+    </p>
+    <div class="vis-diagram" id="vis-word">
+      <div class="vis-stage">
+        <div class="vis-lbl">Input</div>
+        <div class="vis-cells" id="word-chars"></div>
+      </div>
+      <div class="vis-flow-arrow">↓ <span>split on spaces</span></div>
+      <div class="vis-stage">
+        <div class="vis-lbl">Tokens</div>
+        <div class="vis-chips" id="word-tokens"></div>
+      </div>
+    </div>
+
+    <!-- Sentence -->
+    <h2>Sentence Tokenisation</h2>
+    <p>
+      <i>Sentence Tokenisation</i> splits a block of writing into individual <b>sentences</b>.<br>
+      It generally marks the boundaries of a sentence with punctuations like full stops, question marks and exclamation marks.
+    </p>
+    <div class="vis-diagram" id="vis-sent">
+      <div class="vis-stage">
+        <div class="vis-lbl">Input</div>
+        <div class="vis-source-text" id="sent-src"></div>
+      </div>
+      <div class="vis-flow-arrow">↓ <span>split on sentence boundaries</span></div>
+      <div class="vis-stage">
+        <div class="vis-lbl">Tokens</div>
+        <div class="vis-chips" id="sent-tokens"></div>
+      </div>
+    </div>
+
+    <!-- Subword -->
+    <h2>Subword Tokenisation</h2>
+    <p>
+      <i>Subword Tokenisation</i> is the division of words into <b>small parts</b> called <i>subwords</i>.<br>
+      The technique assists the models to learn about rare or unfamiliar words by breaking them into the smaller parts.
+    </p>
+    <div class="vis-diagram" id="vis-subword">
+      <div class="vis-stage">
+        <div class="vis-lbl">"unbelievableness" → subword split</div>
+        <div class="vis-cells" id="sub-chars"></div>
+      </div>
+      <div class="vis-flow-arrow">↓</div>
+      <div class="vis-stage">
+        <div class="vis-chips" id="sub-tokens"></div>
+      </div>
+    </div>
+
+    <ol>
+      <li class="algo_names">Byte Pair Encoding (BPE)</li>
+      <p>
+        <i>Byte Pair Encoding</i> is a subword tokenisation algorithm that compiles tokens by combining the most frequent pairs of
+        characters or subword pairs in a dataset.
+      </p>
+      <div class="vis-diagram vis-diagram--bpe" id="vis-bpe">
+        <div class="vis-lbl">BPE Merge Steps</div>
+        <div class="bpe-timeline" id="bpe-steps"></div>
+      </div>
+
+      <li class="algo_names">WordPiece</li>
+      <p>
+        Another popular subword tokenisation technique is <i>WordPiece</i>. It operates by dividing words into small units
+        according to the frequency of occurrence in the training data.
+      </p>
+      <div class="vis-diagram" id="vis-wp">
+        <div class="vis-stage">
+          <div class="vis-lbl">"playing" → WordPiece</div>
+          <div class="vis-chips">
+            <span class="vt vt--sub" style="animation-delay:0ms">play</span>
+            <span class="vt vt--sub" style="animation-delay:80ms">##ing</span>
+          </div>
+        </div>
+        <div class="vis-footnote">The <strong>##</strong> prefix marks a continuation; the subword attaches to what came before it.</div>
+      </div>
+
+      <li class="algo_names">SentencePiece</li>
+      <p>
+        <i>SentencePiece</i> is a subword tokenisation algorithm which treats text as an unstructured stream of
+        characters and does not use spaces to recognise word boundaries.
+      </p>
+      <div class="vis-diagram" id="vis-sp">
+        <div class="vis-stage">
+          <div class="vis-lbl">"I like cats" → SentencePiece</div>
+          <div class="vis-chips">
+            <span class="vt vt--sub" style="animation-delay:0ms">▁I</span>
+            <span class="vt vt--sub" style="animation-delay:80ms">▁like</span>
+            <span class="vt vt--sub" style="animation-delay:160ms">▁cat</span>
+            <span class="vt vt--sub" style="animation-delay:240ms">s</span>
+          </div>
+        </div>
+        <div class="vis-footnote">The <strong>▁</strong> marker represents a space in the raw stream; no pre-tokenisation needed.</div>
+      </div>
+    </ol>
+
+    <!-- Character -->
+    <h2>Character Tokenisation</h2>
+    <p>
+      <i>Character Tokenisation</i> divides the text into <b>characters</b> rather than words or subwords.<br>
+      Every letter, number or symbol becomes a token.
+    </p>
+    <div class="vis-diagram" id="vis-char">
+      <div class="vis-stage">
+        <div class="vis-lbl">"Hello!" → Character Tokens</div>
+        <div class="vis-chips" id="char-tokens"></div>
+      </div>
+      <div class="vis-footnote">6 characters → 6 tokens. Tiny vocabulary, but sequences become very long.</div>
+    </div>
+
+  </div>
+
+  <div style="height: 80px;"></div>
+
+  <script>
+    (function () {
+      function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+      function makeCharCells(text, container, splitIndices) {
+        var splits = new Set(splitIndices || []);
+        text.split('').forEach(function (ch, i) {
+          var el = document.createElement('span');
+          el.className = 'vc' + (ch === ' ' ? ' vc--space' : '') + (splits.has(i) ? ' vc--split' : '');
+          el.textContent = ch === ' ' ? '␣' : ch;
+          container.appendChild(el);
+        });
+      }
+
+      function addChips(tokens, cls, container) {
+        tokens.forEach(function (t, i) {
+          var el = document.createElement('span');
+          el.className = 'vt ' + cls;
+          el.textContent = t;
+          el.style.animationDelay = (i * 60) + 'ms';
+          container.appendChild(el);
+        });
+      }
+
+      var wordStr = "The cat sat on mats";
+      var wordSplits = [];
+      wordStr.split('').forEach(function (ch, i) { if (ch === ' ') wordSplits.push(i); });
+      makeCharCells(wordStr, document.getElementById('word-chars'), wordSplits);
+      addChips(wordStr.split(' '), 'vt--word', document.getElementById('word-tokens'));
+
+      var sentStr = "I like cats. Do you? Yes!";
+      var sentences = ["I like cats.", "Do you?", "Yes!"];
+      var srcEl = document.getElementById('sent-src');
+      srcEl.innerHTML = esc(sentStr)
+        .replace(/\./g, '<span class="bnd">.</span>')
+        .replace(/\?/g, '<span class="bnd">?</span>')
+        .replace(/!/g, '<span class="bnd">!</span>');
+      addChips(sentences, 'vt--sent', document.getElementById('sent-tokens'));
+
+      makeCharCells("unbelievableness", document.getElementById('sub-chars'));
+      addChips(["un", "believ", "able", "ness"], 'vt--sub', document.getElementById('sub-tokens'));
+
+      var bpeSteps = [
+        { tokens: ["l", "o", "w", "e", "s", "t"], label: "start" },
+        { tokens: ["l", "o", "w", "es", "t"],     label: "e + s → es" },
+        { tokens: ["lo", "w", "es", "t"],          label: "l + o → lo" },
+        { tokens: ["low", "es", "t"],              label: "lo + w → low" },
+        { tokens: ["low", "est"],                  label: "es + t → est" },
+        { tokens: ["lowest"],                      label: "low + est → lowest" }
+      ];
+      var bpeCont = document.getElementById('bpe-steps');
+      bpeSteps.forEach(function (step, si) {
+        var row = document.createElement('div');
+        row.className = 'bpe-row';
+        var lbl = document.createElement('span');
+        lbl.className = 'bpe-row__label' + (si === 0 ? ' bpe-row__label--muted' : '');
+        lbl.textContent = step.label;
+        row.appendChild(lbl);
+        var chips = document.createElement('div');
+        chips.className = 'bpe-row__chips';
+        step.tokens.forEach(function (t, i) {
+          var el = document.createElement('span');
+          el.className = 'vt' + (step.tokens.length === 1 ? ' vt--merged' : ' vt--sub');
+          el.textContent = t;
+          el.style.animationDelay = ((si * 90) + (i * 35)) + 'ms';
+          chips.appendChild(el);
+        });
+        row.appendChild(chips);
+        bpeCont.appendChild(row);
+      });
+
+      "Hello!".split('').forEach(function (ch, i) {
+        var el = document.createElement('span');
+        el.className = 'vt vt--char';
+        el.textContent = ch;
+        el.style.animationDelay = (i * 60) + 'ms';
+        document.getElementById('char-tokens').appendChild(el);
+      });
+
+    })();
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>

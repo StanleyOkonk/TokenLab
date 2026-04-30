@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokenLab | Compare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { accent: { DEFAULT: '#6b5cff', light: '#eeedff' } },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-stone-100 text-stone-800 antialiased font-sans">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 h-[60px] bg-stone-100/85 backdrop-blur-xl border-b border-stone-200">
+    <a href="index.html" class="flex items-center gap-2 no-underline text-stone-800 hover:no-underline">
+      <img src="images/favicon.png" alt="" style="width:28px;height:28px;object-fit:contain;" />
+      <span class="text-2xl font-semibold tracking-tight"><span class="text-accent">Token</span>Lab</span>
+    </a>
+    <div class="flex items-center gap-1">
+      <a href="index.html" class="text-[13px] font-[450] text-stone-400 no-underline px-3.5 py-[7px] rounded-[7px] hover:text-stone-800 hover:bg-black/[0.04] hover:no-underline transition-colors">Visualiser</a>
+      <a href="compare.html" class="text-[13px] font-medium text-accent bg-accent-light no-underline hover:no-underline px-3.5 py-[7px] rounded-[7px]">Compare</a>
+    </div>
+  </nav>
+
+  <!-- Compare box -->
+  <div class="max-w-4xl mx-auto mt-20 mb-10 px-9 py-7 bg-white rounded-xl border border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+    <h2 class="text-center text-[28px] font-light text-accent tracking-tight mb-1">Live Comparison</h2>
+    <p class="text-center text-sm text-stone-400 mb-3">See how BPE, WordPiece and SentencePiece tokenisation handle the same input</p>
+
+    <!-- Language presets -->
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+      <span class="text-[12px] font-semibold uppercase tracking-[0.06em] text-stone-400">Try:</span>
+      <button class="lang-btn active-lang px-3 py-1 border border-stone-200 rounded-full bg-white text-[12.5px] text-stone-800 cursor-pointer hover:border-accent hover:bg-accent-light transition-colors" data-text="The tokenisation of unbelievable text is fascinating!">English</button>
+      <button class="lang-btn px-3 py-1 border border-stone-200 rounded-full bg-white text-[12.5px] text-stone-800 cursor-pointer hover:border-accent hover:bg-accent-light transition-colors" data-text="東京は日本の首都で、世界最大の都市です。">Japanese</button>
+      <button class="lang-btn px-3 py-1 border border-stone-200 rounded-full bg-white text-[12.5px] text-stone-800 cursor-pointer hover:border-accent hover:bg-accent-light transition-colors" data-text="مرحباً بك في عالم الذكاء الاصطناعي">Arabic</button>
+      <button class="lang-btn px-3 py-1 border border-stone-200 rounded-full bg-white text-[12.5px] text-stone-800 cursor-pointer hover:border-accent hover:bg-accent-light transition-colors" data-text="北京是中华人民共和国的首都">Chinese</button>
+    </div>
+
+    <!-- Input -->
+    <textarea id="compareInput" placeholder="Type or paste text here…" spellcheck="false"
+      class="w-full h-[72px] px-3.5 py-3 rounded-lg border border-stone-200 font-sans text-sm resize-none bg-stone-50 outline-none mb-4 text-stone-800 placeholder-stone-300 focus:border-accent focus:bg-white focus:shadow-[0_0_0_3px_rgba(107,92,255,0.10)] transition-[border-color,box-shadow]">The tokenisation of unbelievable text is fascinating!</textarea>
+
+    <!-- 3 column grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+
+      <div class="flex flex-col gap-2">
+        <div class="px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-center">
+          <span class="block text-sm font-semibold text-accent">BPE</span>
+          <span class="block text-[11px] text-stone-400 mt-0.5">Byte Pair Encoding</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 min-h-[80px] p-3.5 bg-stone-50 border border-stone-200 rounded-lg content-start" id="cmp-bpe"></div>
+        <div class="flex gap-4 justify-center pt-2 border-t border-stone-200" id="stats-bpe"></div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-center">
+          <span class="block text-sm font-semibold text-accent">WordPiece</span>
+          <span class="block text-[11px] text-stone-400 mt-0.5">BERT-style</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 min-h-[80px] p-3.5 bg-stone-50 border border-stone-200 rounded-lg content-start" id="cmp-wp"></div>
+        <div class="flex gap-4 justify-center pt-2 border-t border-stone-200" id="stats-wp"></div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-center">
+          <span class="block text-sm font-semibold text-accent">SentencePiece</span>
+          <span class="block text-[11px] text-stone-400 mt-0.5">Unigram-based</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 min-h-[80px] p-3.5 bg-stone-50 border border-stone-200 rounded-lg content-start" id="cmp-sp"></div>
+        <div class="flex gap-4 justify-center pt-2 border-t border-stone-200" id="stats-sp"></div>
+      </div>
+
+    </div>
+
+    <!-- Dynamic insight -->
+    <div class="mt-4 px-4 py-3 bg-accent-light border border-accent/20 rounded-lg text-[13px] text-[#4a4e8a] text-center min-h-[42px] leading-relaxed" id="compare-insight"></div>
+  </div>
+
+  <div class="h-20"></div>
+
+  <script src="script.js"></script>
+  <script>
+    (function () {
+      const COLS = [
+        { outputId: "cmp-bpe", statsId: "stats-bpe", method: "bpe",          label: "BPE" },
+        { outputId: "cmp-wp",  statsId: "stats-wp",  method: "wordpiece",     label: "WordPiece" },
+        { outputId: "cmp-sp",  statsId: "stats-sp",  method: "sentencepiece", label: "SentencePiece" },
+      ];
+
+      function renderColumn(col, text) {
+        const tokens = tokenise(text, col.method);
+        const outputEl = document.getElementById(col.outputId);
+        const statsEl  = document.getElementById(col.statsId);
+        outputEl.innerHTML = "";
+        let colourIdx = 0;
+
+        tokens.forEach(function (tok, i) {
+          const span = document.createElement("span");
+          span.className = "token";
+          span.style.animationDelay = (i * 0.025) + "s";
+          if (/^\s+$/.test(tok)) {
+            span.style.background = "rgba(0,0,0,0.03)";
+            span.style.border = "1px solid #e5e3df";
+            span.style.color = "#bbb";
+            span.textContent = tok === " " ? "▁" : tok === "\n" ? "↵" : "⇥";
+          } else {
+            const ci = colourIdx % token_colours.length;
+            span.style.background = token_colours[ci];
+            span.style.border = "1px solid " + token_borders[ci] + "40";
+            const t = document.createElement("span");
+            t.textContent = tok;
+            span.appendChild(t);
+            colourIdx++;
+          }
+          outputEl.appendChild(span);
+        });
+
+        const nonWs = tokens.filter(function (t) { return !/^\s+$/.test(t); });
+        statsEl.innerHTML =
+          '<span class="cmp-stat"><b>' + nonWs.length + '</b>tokens</span>' +
+          '<span class="cmp-stat"><b>' + new Set(nonWs).size + '</b>unique</span>';
+      }
+
+      function buildInsight(text, counts) {
+        if (!text.trim()) { document.getElementById("compare-insight").textContent = ""; return; }
+        const min = Math.min(...counts);
+        const max = Math.max(...counts);
+        const labels = ["BPE", "WordPiece", "SentencePiece"];
+        const minLabel = labels[counts.indexOf(min)];
+        const maxLabel = labels[counts.indexOf(max)];
+        const nonAscii = (text.match(/[^\x00-\x7F]/g) || []).length;
+        const nonAsciiPct = text.length > 0 ? nonAscii / text.length : 0;
+        var msg = minLabel + " is most efficient (" + min + " tokens). ";
+        if (nonAsciiPct > 0.3) {
+          msg += "Non-Latin scripts often fragment into many more tokens because most subword vocabularies are trained primarily on English text.";
+        } else if (min > 0 && max / min > 4) {
+          msg += maxLabel + " produces " + max + " tokens — " + (max / min).toFixed(1) + "\xD7 more than " + minLabel + ".";
+        } else {
+          msg += maxLabel + " uses " + max + " tokens (" + (min > 0 ? (((max - min) / min) * 100).toFixed(0) : 0) + "% more).";
+        }
+        document.getElementById("compare-insight").textContent = msg;
+      }
+
+      function updateAll() {
+        const text = document.getElementById("compareInput").value;
+        const counts = [];
+        COLS.forEach(function (col) {
+          renderColumn(col, text);
+          const nonWs = tokenise(text, col.method).filter(function (t) { return !/^\s+$/.test(t); });
+          counts.push(nonWs.length);
+        });
+        buildInsight(text, counts);
+      }
+
+      document.getElementById("compareInput").addEventListener("input", updateAll);
+
+      document.querySelectorAll(".lang-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".lang-btn").forEach(function (b) { b.classList.remove("active-lang"); });
+          btn.classList.add("active-lang");
+          document.getElementById("compareInput").value = btn.dataset.text;
+          updateAll();
+        });
+      });
+
+      updateAll();
+    })();
+  </script>
+</body>
+</html>
